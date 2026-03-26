@@ -7,4 +7,4 @@ The original development environment and some supporting files are no longer ava
 
 This repository is included for demonstration purposes only.
 
-![Database in PostgreSQL](Thumbnail.png)
+![Database in PostgreSQL.](Thumbnail.png)
