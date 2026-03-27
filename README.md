@@ -2,6 +2,8 @@
 
 A Python + SQLAlchemy project focused on relational database design and data integrity.
 
+![Database in PostgreSQL.](Thumbnail.png)
+
 ## ⚠️ Project Status
 
 **This is an archived academic project and is not currently runnable.**
@@ -9,8 +11,6 @@ The original development environment and some supporting files are no longer ava
 For functional projects, please see [other repositories in my portfolio.](https://rainbonium.github.io/)
 
 This repository is included to showcase database design, ORM usage, and data modeling concepts.
-
-![Database in PostgreSQL.](Thumbnail.png)
 
 ## Overview
 
@@ -30,8 +30,8 @@ This project focuses on modeling real-world academic data and enforcing data int
 This project demonstrates:
 
 * SQLAlchemy ORM (Object-Relational Mapper)
-* Python
 * Data Relationships (One-to-Many & Many-to-Many)
+* Python
 
 ## Highlights
 
@@ -236,6 +236,6 @@ def delete_section(session):
 ## What I Would Improve
 
 If I were to remake this project today, I would:
-- Improve input validation and error handling.
-- Create a customization file to allow operation on new databases and hardware.
-- Provide a web-based interface to simplify operation for other users.
+* Improve input validation and error handling.
+* Create a customization file to allow operation on new databases and hardware.
+* Provide a web-based interface to simplify operation for other users.
