@@ -1,18 +1,20 @@
 # Student Information System (Archived Project)
 
+A Python + SQLAlchemy project focused on relational database design and data integrity.
+
 ## ⚠️ Project Status
 
 **This is an archived academic project and is not currently runnable.**
 The original development environment and some supporting files are no longer available.
 For functional projects, please see [other repositories in my portfolio.](https://rainbonium.github.io/)
 
-This repository is included for demonstration purposes only.
+This repository is included to showcase database design, ORM usage, and data modeling concepts.
 
 ![Database in PostgreSQL.](Thumbnail.png)
 
 ## Overview
 
-This project demonstrates a command-line student information system built using Pythoin and SQLAlchemy ORM. It's purpose was to manage university data such as:
+This project demonstrates a command-line student information system built using Python and SQLAlchemy ORM. It was designed to manage university data such as:
 
 * Departments
 * Courses
@@ -21,20 +23,20 @@ This project demonstrates a command-line student information system built using 
 * Majors
 * Enrollments
 
-The system uses a simple menu interface to perform CRUD operations and manage changes to data.
+This project focuses on modeling real-world academic data and enforcing data integrity through both application logic and database constraints.
 
 ## Tech
 
-Though not currently executable, it demonstrates an understanding of:
+This project demonstrates:
 
-* SQLAlchemy
+* SQLAlchemy ORM (Object-Relational Mapper)
 * Python
 * Data Relationships (One-to-Many & Many-to-Many)
 
 ## Highlights
 
 ### Boilerplate Data
-The important starting point of testing the database.
+A starting point for testing the database with preset data.
 
 ```py
 def boilerplate(sess):
@@ -70,7 +72,7 @@ def boilerplate(sess):
 ```
 
 ### Example Class
-The class structure makes the addition of new class sections to the database easy. Notice the usage of different constraints to ensure data is specific and accurate.
+The class structure simplifies adding new sections to the database. Notice the usage of different constraints to ensure data is specific and accurate. Uniqueness constraints were used to prohibit duplicates, check constraints to permit only specific values, and foreign key constraints to connect the section to a course. This is only a precaution, since the database itself would also have its own schema to protect against illegal entries.
 
 ```py
 class Section(Base):
@@ -121,3 +123,120 @@ class Section(Base):
             ForeignKeyConstraint([departmentAbbreviation, courseNumber], [Course.departmentAbbreviation, Course.courseNumber])
         )
 ```
+
+### Operations
+These operations allow the user to manipulate data through the console.
+
+```py
+# ADD
+def add_section(session):
+    print("Which course offers this section?")
+    course: Course = select_course(sess)
+    unique: bool = False
+    constraints: list = []
+    constraintVals: list = ["department abbreviation, course number, section number, section year & semester",
+                            "year, semester, schedule, start time, building & room",
+                            "year, semester, schedule, start time & instructor"]
+    sectionNumber: int = -1
+    semester: str = ''
+    sectionYear: int = -1
+    building: str = ''
+    room: int = -1
+    schedule: str = ''
+    startTime: time = time(8, 0, 0)
+    instructor: str = ''
+
+    while not unique:
+        constraints.clear()
+        sectionNumber = int(input("Section number--> "))
+        semester = input("Section semester--> ")
+        sectionYear = int(input("Section year--> "))
+        building = input("Section building--> ")
+        room = int(input("Section room--> "))
+        schedule = input("Section schedule--> ")
+        h, m, s = [int(x) for x in input("Section start time (HH MM SS) (EX: 8 0 0)--> ").split()]
+        startTime = time(h, m, s)
+        instructor = input("Section instructor--> ")
+
+        constraints.append(session.query(Section).filter(Section.departmentAbbreviation == course.departmentAbbreviation,
+                                                         Section.courseNumber == course.courseNumber,
+                                                         Section.sectionNumber == sectionNumber,
+                                                         Section.sectionYear == sectionYear,
+                                                         Section.semester == semester).count())
+
+        constraints.append(session.query(Section).filter(Section.sectionYear == sectionYear,
+                                                         Section.semester == semester,
+                                                         Section.schedule == schedule,
+                                                         Section.startTime == startTime,
+                                                         Section.building == building,
+                                                         Section.room == room).count())
+
+        constraints.append(session.query(Section).filter(Section.sectionYear == sectionYear,
+                                                         Section.semester == semester,
+                                                         Section.schedule == schedule,
+                                                         Section.startTime == startTime,
+                                                         Section.instructor == instructor).count())
+
+        unique = True
+        for c in range(0, 3):
+            if constraints[c] > 0:
+                unique = False
+                print("We found a section with that " + constraintVals[c] + " in our system, please change one of these.")
+
+        if not unique:
+            print("Try again.")
+
+    newSection = Section(course, sectionNumber, semester, sectionYear, building, room, schedule, startTime, instructor)
+    session.add(newSection)
+
+# SELECT
+def select_section(sess) -> Section:
+    found: bool = False
+    department_abbreviation: str = ''
+    course_number: int = -1
+    section_number: int = -1
+    section_year: int = -1
+    semester: str = ''
+    while not found:
+        department_abbreviation = input("Department abbreviation--> ")
+        course_number = int(input("Course Number--> "))
+        section_number = int(input("Section Number--> "))
+        section_year = int(input("Section Year--> "))
+        semester = input("Semester--> ")
+        name_count: int = sess.query(Section).filter(Section.departmentAbbreviation == department_abbreviation,
+                                                     Section.courseNumber == course_number,
+                                                     Section.sectionNumber == section_number,
+                                                     Section.sectionYear == section_year,
+                                                     Section.semester == semester).count()
+        found = name_count == 1
+        if not found:
+            print("No section by that info.  Try again.")
+    session = sess.query(Section).filter(Section.departmentAbbreviation == department_abbreviation,
+                                         Section.courseNumber == course_number,
+                                         Section.sectionNumber == section_number,
+                                         Section.sectionYear == section_year,
+                                         Section.semester == semester).first()
+    return session
+
+# LIST
+def list_course_sections(sess):
+    course = select_course(sess)
+    dept_sections: [Course] = course.get_sections()
+    print("Sections for course: " + str(course))
+    for dept_section in dept_sections:
+        print(dept_section)
+
+# DELETE
+def delete_section(session):
+    print("deleting a section")
+    section: Section = select_section(session)
+    session.delete(section)
+```
+
+## What I Would Improve
+
+If I were to remake this project today, I would:
+- Improve input validation and error handling.
+- Add unit and integration tests.
+- Create a customization file to allow operation on new databases and hardware.
+- Provide a web-based interface to simplify operation for other users.
