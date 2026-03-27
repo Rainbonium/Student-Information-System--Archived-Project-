@@ -237,6 +237,5 @@ def delete_section(session):
 
 If I were to remake this project today, I would:
 - Improve input validation and error handling.
-- Add unit and integration tests.
 - Create a customization file to allow operation on new databases and hardware.
 - Provide a web-based interface to simplify operation for other users.
