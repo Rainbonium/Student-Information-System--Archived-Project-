@@ -4,13 +4,11 @@
 
 **This is an archived academic project and is not currently runnable.**
 The original development environment and some supporting files are no longer available.
-For functional projects, please see ![other repositories in my portfolio.](https://rainbonium.github.io/)
+For functional projects, please see [other repositories in my portfolio.](https://rainbonium.github.io/)
 
 This repository is included for demonstration purposes only.
 
 ![Database in PostgreSQL.](Thumbnail.png)
-
----
 
 ## Overview
 
@@ -25,8 +23,6 @@ This project demonstrates a command-line student information system built using 
 
 The system uses a simple menu interface to perform CRUD operations and manage changes to data.
 
----
-
 ## Tech
 
 Though not currently executable, it demonstrates an understanding of:
@@ -35,10 +31,7 @@ Though not currently executable, it demonstrates an understanding of:
 * Python
 * Data Relationships (One-to-Many & Many-to-Many)
 
-
----
-
-## Key Highlights
+## Highlights
 
 ### Boilerplate Data
 The important starting point of testing the database.
@@ -74,4 +67,57 @@ def boilerplate(sess):
     sess.add(student3)
     sess.add(enrollment)
     sess.flush()                                # Force SQLAlchemy to update the database, although not commit
+```
+
+### Example Class
+The class structure makes the addition of new class sections to the database easy. Notice the usage of different constraints to ensure data is specific and accurate.
+
+```py
+class Section(Base):
+        __tablename__ = table_name
+
+        departmentAbbreviation: Mapped[str] = mapped_column('department_abbreviation', primary_key=True)
+        courseNumber: Mapped[int] = mapped_column('course_number', primary_key=True)
+
+        course: Mapped["Course"] = relationship(back_populates="sections")
+
+        sectionNumber: Mapped[int] = mapped_column('section_number', Integer, nullable=False, primary_key=True)
+        semester: Mapped[str] = mapped_column('semester', String(10), nullable=False, primary_key=True)
+        sectionYear: Mapped[int] = mapped_column('section_year', Integer, nullable=False, primary_key=True)
+        building: Mapped[str] = mapped_column('building', String(6), nullable=False)
+        room: Mapped[int] = mapped_column('room', Integer, nullable=False)
+        schedule: Mapped[str] = mapped_column('schedule', String(6), nullable=False)
+        startTime: Mapped[Time] = mapped_column('start_time', Time, nullable=False)
+        instructor: Mapped[str] = mapped_column('instructor', String(80), nullable=False)
+
+        students: Mapped[List["Enrollment"]] = relationship(back_populates="section",
+                                                              cascade="all, save-update, delete-orphan")
+
+        __table_args__ = (
+            UniqueConstraint(
+                'section_year', 'semester', 'schedule', 'start_time', 'building', 'room',
+                name='sections_uk_01'
+            ),
+            UniqueConstraint(
+                'section_year', 'semester', 'schedule', 'start_time', 'instructor',
+                name='sections_uk_02'
+            ),
+            UniqueConstraint(
+                'department_abbreviation', 'course_number', 'semester', 'section_number',
+                name='sections_uk_03'
+            ),
+            CheckConstraint(
+                "semester IN('Fall', 'Spring', 'Winter', 'Summer I', 'Summer II')",
+                name='sections_semester_check'
+            ),
+            CheckConstraint(
+                "building IN('VEC', 'ECS', 'EN2', 'EN3', 'EN4', 'ET', 'SSPA')",
+                name='sections_building_check'
+            ),
+            CheckConstraint(
+                "schedule IN('MW', 'TuTh', 'MWF', 'F', 'S')",
+                name='sections_schedule_check'
+            ),
+            ForeignKeyConstraint([departmentAbbreviation, courseNumber], [Course.departmentAbbreviation, Course.courseNumber])
+        )
 ```
